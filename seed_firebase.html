@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Singh Motors – Firebase Seeder</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 60px auto; padding: 20px; background: #f5f5f5; }
+  h1 { color: #C8152A; }
+  .box { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.1); margin-bottom: 20px; }
+  .log { background: #1C1C1C; color: #A5F3FC; font-family: monospace; font-size: 13px; border-radius: 6px; padding: 16px; min-height: 200px; max-height: 400px; overflow-y: auto; line-height: 1.8; }
+  .log .ok  { color: #86EFAC; }
+  .log .err { color: #FCA5A5; }
+  .log .info{ color: #FDE68A; }
+  button { background: #C8152A; color: #fff; border: none; padding: 14px 32px; font-size: 15px; font-weight: 700; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  .done-box { background: #DCFCE7; border: 2px solid #16A34A; border-radius: 8px; padding: 20px; display: none; text-align: center; }
+  .done-box h2 { color: #15803D; margin: 0 0 8px; }
+  .done-box p  { color: #166534; margin: 0; font-size: 14px; }
+  .warning { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 6px; padding: 14px; font-size: 13px; color: #92400E; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h1>🔥 Singh Motors — Firebase Seeder</h1>
+  <p style="color:#666;font-size:14px;">This page will import all 44 products into your Firebase database. Open this page <strong>once</strong>, click the button, and wait for it to finish. Then delete this file from GitHub.</p>
+
+  <div class="warning">
+    ⚠️ <strong>Important:</strong> This will first <strong>delete</strong> the junk test product you added earlier, then import all 44 real products cleanly.
+  </div>
+
+  <button id="seedBtn" onclick="runSeed()">▶ Start Import (44 Products)</button>
+</div>
+
+<div class="box">
+  <div style="font-size:13px;font-weight:700;color:#666;margin-bottom:8px;">PROGRESS LOG</div>
+  <div class="log" id="log">Waiting to start...</div>
+</div>
+
+<div class="done-box" id="doneBox">
+  <h2>✅ All Done!</h2>
+  <p>All 44 products are now in Firebase. Your website will show them all.<br><br>
+  <strong>Next step:</strong> Go to your <a href="https://harsehaj33.github.io/Singh-Motors/singh_motors.html">live website</a> and refresh — all products will be there.<br>
+  Then <strong>delete this seed_firebase.html file from GitHub</strong> (you don't need it anymore).</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:            "AIzaSyCU6btJEAn8bTlfLpWvVpbM9KT_sC6Rthw",
+  authDomain:        "singh-motors.firebaseapp.com",
+  projectId:         "singh-motors",
+  storageBucket:     "singh-motors.firebasestorage.app",
+  messagingSenderId: "362499028729",
+  appId:             "1:362499028729:web:38ba3d584accaa4c619428"
+});
+const db = getFirestore(app);
+
+const PRODUCTS = [
+  {sku:"SKU-001",category:"Engine Parts",name:"Belt Tensioner Pulley (Long & Small)",description:"Drive belt tensioner pulleys for Maruti Suzuki – large and compact variants for maintaining serpentine belt tension."},
+  {sku:"SKU-011",category:"Engine Parts",name:"Engine Mounting – Maruti Alto RH/LH",description:"Maruti Suzuki engine mounting bracket for Alto – available in right-hand (RH) and left-hand (LH) sides."},
+  {sku:"SKU-012",category:"Engine Parts",name:"Gearbox Mount – Maruti Gypsy King",description:"Maruti Suzuki gearbox / transmission mount for Gypsy King. Part No. 99676 M 7409."},
+  {sku:"SKU-013",category:"Engine Parts",name:"Timing Belt Tensioner – Maruti Zen / Gypsy King",description:"Timing belt tensioner bearing for Maruti Zen and Gypsy King engines."},
+  {sku:"SKU-028",category:"Engine Parts",name:"Radiator Cap (Tighten / Remove Slowly)",description:"Universal radiator pressure cap – embossed with safety instruction. Fits most Maruti Suzuki models."},
+  {sku:"SKU-038",category:"Engine Parts",name:"Clutch Plate & Pressure Plate – Maruti Suzuki",description:"Clutch disc (friction plate with springs) and pressure plate assembly for all Maruti Suzuki vehicles."},
+  {sku:"SKU-039",category:"Engine Parts",name:"Clutch Kit (Disc & Cover) – Maruti Suzuki",description:"Complete replacement clutch kit – clutch cover and clutch disc set for Maruti Suzuki."},
+  {sku:"SKU-002",category:"Electrical",name:"Wagon R Automotive Fuse Set",description:"Coloured blade fuse assortment for Maruti Wagon R – various amperage ratings in red, green, yellow and blue."},
+  {sku:"SKU-005",category:"Electrical",name:"Point Condenser Kit – Maruti",description:"Ignition contact points and condenser kit for Maruti Suzuki – ensures reliable spark timing."},
+  {sku:"SKU-006",category:"Electrical",name:"Horn Relay 12V – Maruti Suzuki",description:"Maruti Suzuki 12V Autopal horn relay for Gypsy King and other models."},
+  {sku:"SKU-016",category:"Electrical",name:"Alternator Voltage Regulator Cut-Out – Maruti Alto",description:"Valeo alternator voltage regulator / cut-out unit for Maruti Alto – controls charging system output."},
+  {sku:"SKU-019",category:"Electrical",name:"Windshield Washer Motor Pump (Single Outlet)",description:"Electric windscreen washer fluid pump – single-outlet type for various Maruti Suzuki models."},
+  {sku:"SKU-020",category:"Electrical",name:"Windshield Washer Motor Pump (Dual Outlet)",description:"Electric windscreen washer pump with dual-outlet nozzle connection for front and rear wash systems."},
+  {sku:"SKU-024",category:"Electrical",name:"ECU Connector Wiring Harness – Multi-Car (Type 3)",description:"Compatible with Swift/Ritz, Baleno, Ertiga, Ignis, Hyundai i20, Renault Kwid and Tata Tiago."},
+  {sku:"SKU-031",category:"Electrical",name:"Ignition Coil – Maruti Eeco / Alto / Gypsy King (Denso)",description:"Denso pencil-type ignition coil for Maruti Eeco, Alto and Gypsy King 8-valve engines."},
+  {sku:"SKU-032",category:"Electrical",name:"Ignition Coil Assembly – Maruti Alto K10",description:"Maruti Suzuki ignition coil assembly for Alto K10 engine. Part No. 33400 M 68K20."},
+  {sku:"SKU-033",category:"Electrical",name:"Ignition Coil – Nissan (22433-4808R)",description:"Nissan Group pencil-type ignition coil assembly. Part No. 22433-4808R for Nissan/Datsun vehicles."},
+  {sku:"SKU-003",category:"Brakes",name:"Maruti Suzuki Rear Brake Pads",description:"Maruti Suzuki rear disc brake pads, set of 4, with friction material."},
+  {sku:"SKU-004",category:"Brakes",name:"Disc Brake Pad Set (Front)",description:"Front disc brake pad set for Maruti Suzuki vehicles – high-friction semi-metallic compound for reliable stopping."},
+  {sku:"SKU-014",category:"Brakes",name:"Brake Shoe Set – Maruti Van T3 / Eeco",description:"Maruti Suzuki rear drum brake shoe set for Van T3 and Eeco models – includes 4 shoes."},
+  {sku:"SKU-021",category:"Brakes",name:"Brake Hose Assembly – Maruti Gypsy",description:"Flexible braided steel brake hose assemblies for Maruti Gypsy – sold in pairs for front or rear fitment."},
+  {sku:"SKU-029",category:"Brakes",name:"Brake Shoe Kit – Maruti Alto K10 (KBX)",description:"KBX rear drum brake shoe kit for Maruti Alto K10. Part KBX 591."},
+  {sku:"SKU-034",category:"Brakes",name:"Wheel Cylinder Assembly – M&M Bolero Maxi Truck",description:"Brakes India wheel cylinder assembly RLH/RRH for Mahindra Bolero Maxi Truck. Part No. 29666040."},
+  {sku:"SKU-036",category:"Brakes",name:"Brake Pad Set – Isuzu (Front)",description:"Isuzu Motors front disc brake pad set. Part No. 8-97447404-0 for Isuzu light commercial vehicles."},
+  {sku:"SKU-007",category:"Suspension",name:"Wagon R Lower Control Arm (Latest Model)",description:"Front lower suspension arm (wishbone) for Maruti Wagon R latest model – heavy-duty steel construction with ball joint."},
+  {sku:"SKU-015",category:"Suspension",name:"Suspension Arm Bush (Big) – Maruti Swift",description:"Maruti Suzuki large lower arm bush for Swift. Part No. 45540 M 68J00."},
+  {sku:"SKU-017",category:"Suspension",name:"Lower Control Arm – Maruti Zen Alto (Rane)",description:"Track/lower control arm for Zen Alto – high-quality OE replacement."},
+  {sku:"SKU-022",category:"Suspension",name:"Front Lower Control Arm – Hyundai Grand i10 LH",description:"Hyundai front lower suspension arm assemblies for Grand i10 / Xcent – LH and RH available."},
+  {sku:"SKU-025",category:"Suspension",name:"Tie Rod End – Maruti Swift N/M (Pair)",description:"Outer tie rod ends for Maruti Suzuki Swift N/M series – sold as a pair, LH and RH."},
+  {sku:"SKU-026",category:"Suspension",name:"Lower Arm – Maruti Celerio / A-Star",description:"Genuine Maruti Suzuki lower arm assembly for Celerio / A-Star (DDT KA02022) – RH fitment."},
+  {sku:"SKU-027",category:"Suspension",name:"Complete Suspension Kit – Maruti Alto",description:"Full front suspension kit for Maruti Alto – includes control arm, steering rack end, and tie rod end."},
+  {sku:"SKU-037",category:"Suspension",name:"Front Wheel Bearing – Maruti Suzuki",description:"Maruti Suzuki front wheel hub bearing – sealed double-row unit."},
+  {sku:"SKU-043",category:"Suspension",name:"Front Wheel Bearing – Maruti Suzuki (SKU-043)",description:"Maruti Suzuki front wheel hub bearing – sealed double-row unit for smooth wheel rotation."},
+  {sku:"SKU-044",category:"Suspension",name:"Shocker Kit – Maruti Suzuki",description:"Maruti Suzuki shock absorber repair kit – includes oil seal, dust boot, bump stop, washers and nut."},
+  {sku:"SKU-045",category:"Suspension",name:"Front Stabiliser Linkage – Maruti A-Star",description:"Front anti-roll bar / stabiliser drop link for Maruti Suzuki A-Star – replaces worn linkage pins."},
+  {sku:"SKU-023",category:"Filters",name:"Petrol Filter – Maruti Gypsy King",description:"Maruti Suzuki petrol fuel filter for Gypsy King. Part No. 13780 M 73M10."},
+  {sku:"SKU-030",category:"Filters",name:"Air Filter – Maruti Alto T1/T2/T3 / Wagon R / Eeco",description:"Maruti Suzuki panel air filter for Alto T-series, Wagon R and Eeco."},
+  {sku:"SKU-035",category:"Filters",name:"Oil Filter Element – Maruti Suzuki Diesel",description:"Maruti Suzuki diesel engine oil filter cartridge element with O-ring. Part No. 15411M55K00."},
+  {sku:"SKU-040",category:"Filters",name:"Air Filter – Maruti Swift 2024 Model",description:"Maruti Suzuki panel air filter for Swift 2024 model (new generation)."},
+  {sku:"SKU-008",category:"Seals & Gaskets",name:"Gypsy Floor Seal Protector – Maruti",description:"Maruti Suzuki Gypsy floor seal protector O-ring. Part No. 09289-73000."},
+  {sku:"SKU-009",category:"Seals & Gaskets",name:"Cylinder Head Gasket Set – Alto / Wagon R / Eeco",description:"Maruti Suzuki cylinder head gaskets for Alto, Wagon R, and Eeco engines."},
+  {sku:"SKU-010",category:"Seals & Gaskets",name:"Gearbox Oil Seal – Maruti Gypsy King",description:"Maruti Suzuki gearbox oil seal for Gypsy King. Part No. 29970 M D0050."},
+  {sku:"SKU-018",category:"Seals & Gaskets",name:"Pinion Oil Seal – Maruti Gypsy King (Bulk Pack)",description:"Maruti Suzuki pinion oil seals for Gypsy King. Part No. 02365 M 94070."},
+  {sku:"SKU-042",category:"Seals & Gaskets",name:"Seal Drive Shaft – Hyundai / KIA (RH)",description:"Genuine KIA / Hyundai drive shaft oil seal (Right Hand) – Mobis India. MRP Rs.1240. Bulk orders only."}
+];
+
+function log(msg, type='info') {
+  const el = document.getElementById('log');
+  el.innerHTML += `<div class="${type}">${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+window.runSeed = async function() {
+  const btn = document.getElementById('seedBtn');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  document.getElementById('log').innerHTML = '';
+
+  try {
+    // Step 1: Delete ALL existing documents
+    log('🗑️  Clearing existing Firebase data...', 'info');
+    const existing = await getDocs(collection(db, 'products'));
+    let deleted = 0;
+    for (const d of existing.docs) {
+      await deleteDoc(doc(db, 'products', d.id));
+      deleted++;
+    }
+    log(`✓ Deleted ${deleted} existing product(s)`, 'ok');
+
+    // Step 2: Add all 44 products
+    log('📦  Importing 44 products...', 'info');
+    let added = 0;
+    for (const p of PRODUCTS) {
+      await addDoc(collection(db, 'products'), {
+        ...p,
+        images: [],
+        videos: [],
+        price: '',
+        qty: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      added++;
+      log(`  ✓ ${added}/44 — ${p.sku}: ${p.name}`, 'ok');
+    }
+
+    log('', '');
+    log('🎉  ALL DONE! 44 products imported successfully.', 'ok');
+    document.getElementById('doneBox').style.display = 'block';
+    btn.textContent = '✅ Complete';
+
+  } catch(e) {
+    log('❌  Error: ' + e.message, 'err');
+    btn.disabled = false;
+    btn.textContent = '▶ Retry';
+  }
+};
+</script>
+</body>
+</html>
